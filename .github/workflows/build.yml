@@ -1,0 +1,57 @@
+name: Build iPhone test app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+
+      - name: Generate project
+        run: xcodegen generate --spec project.yml
+
+      - name: Build for real iPhones
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project HFPProbe.xcodeproj \
+            -scheme HFPProbe \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          app_path='build/DerivedData/Build/Products/Release-iphoneos/HFPProbe.app'
+          test -d "$app_path"
+          mkdir -p build/package/Payload
+          ditto "$app_path" build/package/Payload/HFPProbe.app
+          cd build/package
+          ditto -c -k --keepParent Payload HFPProbe-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HFPProbe-unsigned
+          path: build/package/HFPProbe-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
