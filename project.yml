@@ -1,0 +1,40 @@
+name: HFPProbe
+
+options:
+  deploymentTarget:
+    iOS: "16.7"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.7"
+
+targets:
+  HFPProbe:
+    type: application
+    platform: iOS
+    sources:
+      - path: HFPProbe.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.hfpprobe
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+    info:
+      path: Generated/Info.plist
+      properties:
+        CFBundleDisplayName: Bluetooth-Audiotest
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSMicrophoneUsageDescription: "Für den Freisprechtest wird eine Audioverbindung mit Mikrofoneingang verwendet. Die App zeichnet das Mikrofon nicht auf."
+        UILaunchScreen: {}
+        UIBackgroundModes:
+          - audio
+
+schemes:
+  HFPProbe:
+    build:
+      targets:
+        HFPProbe: all
